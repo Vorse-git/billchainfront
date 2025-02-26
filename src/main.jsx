@@ -5,6 +5,8 @@ import "./index.css"; // Asegúrate de que este archivo existe en src/
 import Login from "./pages/Login"; // Corregido, usa mayúscula en Login
 import App from "./App";
 import PrivateRoute from "./routes/PrivateRoute";
+import Dashboard from "./pages/Dashboard";
+
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -15,7 +17,7 @@ createRoot(document.getElementById("root")).render(
           path="/dashboard"
           element={
             <PrivateRoute>
-              <App />
+              <Dashboard /> {/* Reemplaza App con Dashboard */}
             </PrivateRoute>
           }
         />
