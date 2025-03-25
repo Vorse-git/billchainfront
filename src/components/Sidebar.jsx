@@ -135,12 +135,12 @@ const Sidebar = () => {
     </summary>
     <ul className="mt-2 space-y-1 px-4">
       <li>
-        <a
-          href="#"
-          className="flex items-center gap-2 border-s-[3px] border-transparent px-4 py-3 text-gray-500 hover:border-[#4416A8] hover:bg-[#F9F6FF] hover:text-[#4416A8]"
+       <Link
+          to="/createinvoice"
+          className="flex items-center gap-2 border-s-[3px] border-transparent px-4 py-3 text-gray-500 text-sm font-medium hover:text-gray-800"
         >
-          <span className="text-sm font-medium">Create Invoice</span>
-        </a>
+          Create Invoice
+        </Link>
       </li>
       <li>
         <Link

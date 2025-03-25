@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import MyInvoices from "./pages/MyInvoices";
+import CreateInvoice from "./pages/CreateInvoice";  // ✅ Importar la nueva página
 import PrivateRoute from "./routes/PrivateRoute";
 
 function App() {
@@ -25,6 +26,14 @@ function App() {
             </PrivateRoute>
           } 
         />
+        <Route 
+          path="/createinvoice" 
+          element={
+            <PrivateRoute>
+              <CreateInvoice />
+            </PrivateRoute>
+          }
+        />
         <Route path="/*" element={<h1>❌ Página no encontrada</h1>} />
       </Routes>
     </Router>
@@ -32,4 +41,5 @@ function App() {
 }
 
 export default App;
+
 

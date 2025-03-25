@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
 import Navbar from "../components/Navbar.jsx";
 import Breadcrumbs from "../components/Breadcrumbs.jsx";
@@ -43,6 +44,7 @@ const CreateInvoiceIcon = () => (
 const MyInvoices = () => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
+  const navigate = useNavigate();
 
   const breadcrumbs = [
     { label: "Home", path: "/" },
@@ -56,6 +58,10 @@ const MyInvoices = () => {
         (status ? invoice.status === status : true)
       )
     : [];
+
+  const handleCreateInvoice = () => {
+    navigate("/createinvoice");
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -78,7 +84,12 @@ const MyInvoices = () => {
             <Button variant="outlined" size="large" startAdornment={<DownloadIcon />}>
               Download
             </Button>
-            <Button variant="primary" size="large" startAdornment={<CreateInvoiceIcon />}>
+            <Button
+              variant="primary"
+              size="large"
+              startAdornment={<CreateInvoiceIcon />}
+              onClick={handleCreateInvoice}
+            >
               Create Invoice
             </Button>
           </div>
@@ -93,3 +104,4 @@ const MyInvoices = () => {
 };
 
 export default MyInvoices;
+
