@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 const Sidebar = () => {
   return (
-<div className="flex min-h-screen w-[250px] flex-col border-r bg-white">
+<div className="flex min-h-screen w-[250px] flex-col border-r bg-[#FBFCFF]">
     <div className="px-4 py-6">
         {/* Logo en la parte superior con 200px de ancho y alineado a la izquierda */}
         <div className="mb-8 flex justify-start">

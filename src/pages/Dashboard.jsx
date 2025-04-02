@@ -19,9 +19,9 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-white">
       <Sidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-white">
         <Navbar />
 
         <div className="px-6 pb-6">
@@ -61,5 +61,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-

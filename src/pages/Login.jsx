@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../utils/auth";
-import logo from "../../img/logo-billchain.svg"; // Nueva ruta del logo
-import mockup from "../../img/mockup.png"; // Ruta de la imagen mockup.png
-import isotipo from "../../img/isotipo-blanco.svg"; // Ruta del isotipo
+import logo from "../../img/logo-billchain.svg"; 
+import mockup from "../../img/mockup.png"; 
+import isotipo from "../../img/isotipo-blanco.svg"; 
+
 
 const Login = () => {
   const [email, setEmail] = useState("");

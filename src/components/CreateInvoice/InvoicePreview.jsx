@@ -38,20 +38,20 @@ const InvoicePreview = ({ formData }) => {
   const { subtotal, taxAmount, shipping, discount, totalDue } = calculateTotals();
 
   return (
-    <div className="bg-white shadow-md rounded-2xl p-8 h-full overflow-auto">
+    <div className="bg-white rounded-2xl p-8 h-full overflow-auto">
       {/* Encabezado */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-start mb-6">
       <div className="w-32">
           <img 
             src="/Logo-preview.svg" 
             alt="Billchain Logo" 
-            className="w-16 h-auto"
+            className="w-12 h-auto"
           />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">INVOICE</h1>
-          <div className="mt-2 text-sm text-gray-500">
-            <p>Invoice #: {formData.invoiceNumber || "—"}</p>
+          <h1 className="text-xl font-bold text-gray-800">STANDARD INVOICE</h1>
+          <div className="mt-2 text-sm space-x-7 text-gray-500 flex">
+            <p>Invoice No: {formData.invoiceNumber}</p>
             <p>Date: {formatDate(formData.invoiceDate)}</p>
             <p>Due Date: {formatDate(formData.dueDate)}</p>
           </div>
@@ -62,8 +62,10 @@ const InvoicePreview = ({ formData }) => {
       {/* Información de compañías */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         <div>
-          <h2 className="text-lg font-semibold mb-2 text-gray-700">Bill From:</h2>
-          <div className="space-y-1 text-gray-600">
+          <div className="bg-[#F3F4F4] px-2 py-0 rounded-md items-center">
+          <h2 className="text-sm font-semibold mb-2 text-gray-500">BILL FROM</h2>
+          </div>
+          <div className="space-y-1 text-gray-400">
             <p>{formData.billFrom?.companyName || "Your Company Name"}</p>
             <p>{formData.billFrom?.address || "123 Main St"}</p>
             <p>{formData.billFrom?.city || "City, State, ZIP"}</p>
@@ -73,8 +75,10 @@ const InvoicePreview = ({ formData }) => {
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold mb-2 text-gray-700">Bill To:</h2>
-          <div className="space-y-1 text-gray-600">
+        <div className="bg-[#F3F4F4] px-2 py-0 rounded-md items-center">
+          <h2 className="text-sm font-semibold mb-2 text-gray-500">BILL TO</h2>
+        </div>
+          <div className="space-y-1 text-gray-400">
             <p>{formData.billTo?.companyName || "Client Company"}</p>
             <p>{formData.billTo?.address || "456 Client Ave"}</p>
             <p>{formData.billTo?.city || "Client City, State, ZIP"}</p>
@@ -86,8 +90,10 @@ const InvoicePreview = ({ formData }) => {
 
       {/* Tabla de items */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-3 text-gray-700">Items:</h2>
-        <div className="overflow-x-auto">
+      <div className="bg-[#F3F4F4] px-2 py-0 rounded-md items-center">
+        <h2 className="text-sm font-semibold mb-3 text-gray-500">ITEMS</h2>
+        </div>
+        <div className="overflow-x-auto rounded-md">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-100 text-left text-gray-600">
@@ -118,8 +124,8 @@ const InvoicePreview = ({ formData }) => {
       {/* Totales */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <h2 className="text-lg font-semibold mb-3 text-gray-700">Notes:</h2>
-          <p className="text-gray-600">
+          <h2 className="text-sm font-semibold mb-3 text-gray-700">NOTES:</h2>
+          <p className="text-gray-400">
             {formData.notes || "Thank you for your business!"}
           </p>
         </div>
@@ -153,8 +159,10 @@ const InvoicePreview = ({ formData }) => {
 
       {/* Información de pago */}
       <div className="mt-8 pt-6 border-t border-gray-300">
-        <h2 className="text-lg font-semibold mb-3 text-gray-700">Payment Information:</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600">
+      <div className="bg-[#F3F4F4] px-2 py-0 rounded-md items-center">
+        <h2 className="text-sm font-semibold mb-3 text-gray-700">PAYMENT INFORMATION:</h2>
+      </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-400">
           <div>
             <p><span className="font-medium">Terms:</span> {formData.paymentTerms || "Net 30"}</p>
             <p><span className="font-medium">Methods:</span> {formData.paymentMethods || "Bank Transfer, Credit Card"}</p>
