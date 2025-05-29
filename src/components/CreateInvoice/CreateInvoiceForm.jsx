@@ -1,24 +1,37 @@
-// ✅ CreateInvoiceForm.jsx (Final Corrected Version)
+// ✅ CreateInvoiceForm.jsx (Accordion UI Updated - Full Code Restored)
 import React, { useState, useEffect } from "react";
 import CustomInputSimple from "../FormElements/CustomInput";
 import CustomDatePickerSimple from "../FormElements/CustomDatePicker";
 import CustomSelectSimple from "../FormElements/CustomSelect";
-import { TrashIcon, PlusIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
-import { format as formatDateFns } from 'date-fns'; // Importar format para fechas
+import { TrashIcon, PlusIcon, ChevronDownIcon, InformationCircleIcon } from "@heroicons/react/24/outline"; // Asegúrate que InformationCircleIcon esté importado si lo usas
+import { format as formatDateFns, addDays } from 'date-fns';
 
-// --- Helper Components (Asegurar definiciones completas) ---
+// --- Helper Components ---
 const Divider = () => <hr className="my-4 border-gray-300" />;
 
-const AccordionSection = ({ title, children, isOpen, onToggle }) => (
+// --- MODIFICADO: AccordionSection con nuevo estilo para el icono ---
+const AccordionSection = ({ title, children, isOpen, onToggle, subtitle = null }) => (
   <div>
+    {/* El div principal del encabezado sigue manejando el click */}
     <div className="flex justify-between items-center cursor-pointer mb-2" onClick={onToggle}>
-      <h2 className="text-xl font-semibold">{title}</h2>
-      <ChevronDownIcon className={`h-5 w-5 transform transition-transform ${isOpen ? "rotate-180" : "rotate-0"}`} />
+      {/* Título y subtítulo (si existe) */}
+      <div className="flex items-center gap-2">
+        <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+        {subtitle && <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{subtitle}</span>}
+      </div>
+      {/* Contenedor estilizado para el icono */}
+      <div className={`flex items-center justify-center w-7 h-7 rounded-md bg-gray-100 ${!isOpen ? 'hover:bg-gray-200' : 'bg-gray-100'} transition-colors`}>
+        <ChevronDownIcon
+          className={`h-4 w-4 text-gray-500 transform transition-transform duration-200 ease-in-out ${isOpen ? "rotate-180" : "rotate-0"}`}
+        />
+      </div>
     </div>
-    {isOpen && <div className="space-y-3 transition-all pb-4">{children}</div>}
+    {/* Contenido desplegable */}
+    {isOpen && <div className="space-y-3 transition-all pb-4 pt-2">{children}</div>}
     <Divider />
   </div>
 );
+// ---------------------------------------------------------------
 
 const AddressFields = ({ data, parentKey, onChange, labelPrefix = "", errors = {} }) => (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -39,6 +52,7 @@ const BankInfoFields = ({ data, parentKey, onChange, errors = {} }) => (
    </div>
 );
 
+// --- Definición local de paymentMethodOptions ---
 const paymentMethodOptions = [
   { value: "", label: "Select a payment method..." },
   { value: "bank_transfer", label: "Bank Transfer (ACH/Wire)" },
@@ -51,54 +65,50 @@ const paymentMethodOptions = [
   { value: "cash", label: "Cash" },
   { value: "other", label: "Other (Specify in Notes)" },
 ];
-// --------------------------------------------------------
+
+// --- Opciones para el SELECT de tipos de factura ---
+// (Aunque se recibe como prop 'templateOptions', tenerla aquí puede ser útil como fallback o si se quita la prop)
+const invoiceTypeOptions = [
+    { value: "", label: "Select Invoice Type..." }, // Asegúrate que la prop tenga esta opción
+    { value: "standard_invoice", label: "Standard Invoice" },
+    { value: "proforma_invoice", label: "Proforma Invoice" }
+];
+// ----------------------------------------------
 
 // --- Componente Principal ---
 const CreateInvoiceForm = ({
   formData,
-  setFormData, // Necesario para pre-rellenar
+  setFormData,
   selectedTemplate,
   setSelectedTemplate,
-  errors = {}
+  errors = {},
+  templateOptions = invoiceTypeOptions // Usar definición local como fallback
 }) => {
   const [totals, setTotals] = useState({ subtotal: 0, tax: 0, shipping: 0, discount: 0, totalDue: 0 });
-  // Estado inicial de acordeones (todos abiertos)
   const initialAccordionState = {
     invoiceInfo: true, billFrom: true, billTo: true, items: true,
-    paymentTerms: true, bankInfo: true, notes: true
+    paymentTerms: true, shippingInfo: true, bankInfo: true, notes: true
   };
   const [openAccordions, setOpenAccordions] = useState(initialAccordionState);
 
-  // --- useEffect para pre-rellenar campos ---
+  // useEffect para pre-rellenar campos
   useEffect(() => {
-    if (selectedTemplate === 'standard_invoice') {
+    if (selectedTemplate) {
         const currentDate = new Date();
-        const formattedMonthYear = formatDateFns(currentDate, 'MM-yyyy'); // MM-YYYY
-        // TODO: Implementar lógica real para secuencia (00001)
-        const invoiceNumberValue = `STD-NYC-${formattedMonthYear}-00001`;
-
-        // Actualizar formData en el padre (CreateInvoice) usando la prop setFormData
-        setFormData(prevData => {
-            const shouldUpdateDate = !(prevData.invoiceDate instanceof Date && !isNaN(prevData.invoiceDate));
-            const shouldUpdateNumber = !prevData.invoiceNumber;
-            // Solo actualiza si es necesario para evitar re-renders innecesarios
-            if (shouldUpdateDate || shouldUpdateNumber) {
-                return {
-                    ...prevData,
-                    invoiceDate: shouldUpdateDate ? currentDate : prevData.invoiceDate,
-                    invoiceNumber: shouldUpdateNumber ? invoiceNumberValue : prevData.invoiceNumber,
-                };
-            }
-            return prevData; // No hay cambios necesarios
-        });
+        let updates = {};
+        if (!(formData.invoiceDate instanceof Date && !isNaN(formData.invoiceDate))) updates.invoiceDate = currentDate;
+        if (!formData.invoiceNumber) {
+            const formattedMonthYear = formatDateFns(currentDate, 'MM-yyyy');
+            const sequence = "00001"; // TODO: Lógica secuencia real
+            if (selectedTemplate === 'standard_invoice') updates.invoiceNumber = `STD-NYC-${formattedMonthYear}-${sequence}`;
+            else if (selectedTemplate === 'proforma_invoice') updates.invoiceNumber = `PRF-NYC-${formattedMonthYear}-${sequence}`;
+        }
+        if (selectedTemplate === 'proforma_invoice' && !(formData.validUntil instanceof Date && !isNaN(formData.validUntil))) updates.validUntil = addDays(currentDate, 30);
+        if (Object.keys(updates).length > 0) setFormData(prevData => ({ ...prevData, ...updates }));
     }
-    // Considera si quieres limpiar estos campos si se deselecciona la plantilla
-    // else {
-    //     setFormData(prevData => ({ ...prevData, invoiceDate: null, invoiceNumber: "" }));
-    // }
-  }, [selectedTemplate, setFormData]); // Depende del template y de la función para actualizar
+  }, [selectedTemplate, setFormData, formData.invoiceDate, formData.invoiceNumber, formData.validUntil]);
 
-  // --- useEffect para calcular totales ---
+  // useEffect para calcular totales
   useEffect(() => {
     const subtotal = formData.items.reduce((sum, item) => (sum + (parseFloat(item.quantity) || 0) * (parseFloat(item.unitPrice) || 0)), 0);
     const taxRate = parseFloat(formData.tax);
@@ -110,76 +120,89 @@ const CreateInvoiceForm = ({
     setTotals({ subtotal, tax, shipping, discount, totalDue });
   }, [formData.items, formData.tax, formData.shipping, formData.discount]);
 
-
-  // --- Handlers ---
+  // Handlers
   const handleAddItem = () => { setFormData(prev => ({ ...prev, items: [...prev.items, { description: "", quantity: "", unitPrice: "", total: 0 }] })); };
   const handleRemoveItem = (index) => { setFormData(prev => ({ ...prev, items: prev.items.filter((_, i) => i !== index) })); };
   const handleItemChange = (index, field, value) => {
       const updatedItems = [...formData.items];
       updatedItems[index][field] = value;
-      if (field === "quantity" || field === "unitPrice") { /* recalcular total */ }
+      if (field === "quantity" || field === "unitPrice") {
+          const quantity = parseFloat(updatedItems[index].quantity) || 0;
+          const unitPrice = parseFloat(updatedItems[index].unitPrice) || 0;
+          updatedItems[index].total = quantity * unitPrice;
+      }
       setFormData(prev => ({ ...prev, items: updatedItems }));
-  };
+   };
    const handleInputChange = (field, value) => {
-      // Los componentes hijos readOnly ya no dispararán onChange
       let finalValue = value;
-      if (field === "tax") { /* validación tax */ }
+      if (field === "tax") {
+         const cleanedValue = value.replace(/[^0-9.]/g, '');
+         const parts = cleanedValue.split('.');
+         finalValue = parts.length > 1 ? parts[0] + '.' + parts[1].slice(0, 2) : parts[0];
+      }
       setFormData(prev => ({ ...prev, [field]: finalValue }));
-  };
+   };
   const handleNestedInputChange = (parent, field, value) => { setFormData(prev => ({ ...prev, [parent]: { ...prev[parent], [field]: value } })); };
 
-  // Handler para cambio de Template
+  // Handler cambio de Template
   const handleTemplateChange = (value) => {
-    setSelectedTemplate(value); // Llama a la función de CreateInvoice
-    if (value === 'standard_invoice') {
-      setOpenAccordions(initialAccordionState); // Resetear acordeones
+    setSelectedTemplate(value);
+    if (value === 'standard_invoice' || value === 'proforma_invoice') {
+      setOpenAccordions(initialAccordionState);
     }
   };
 
-  // --- Función Toggle Acordeón ---
+  // Toggle Acordeón
   const toggleAccordion = (accordionKey) => {
     setOpenAccordions(prevOpenAccordions => ({
       ...prevOpenAccordions,
-      [accordionKey]: !prevOpenAccordions[accordionKey] // Invierte el valor booleano
+      [accordionKey]: !prevOpenAccordions[accordionKey]
     }));
   };
 
-  // --- Funciones de formato ---
+  // Formato Moneda y Fecha
   const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(isNaN(amount) ? 0 : amount);
   const formatDateForDisplay = (date) => {
     if (!date) return "";
-    try {
-      const dateObj = date instanceof Date ? date : new Date(date);
-      return isNaN(dateObj.getTime()) ? "" : formatDateFns(dateObj, 'MM/dd/yyyy');
-    } catch (error) { return ""; }
+    try { const dateObj = date instanceof Date ? date : new Date(date); return isNaN(dateObj.getTime()) ? "" : formatDateFns(dateObj, 'MM/dd/yyyy'); }
+    catch (error) { return ""; }
   };
 
+  const isProforma = selectedTemplate === 'proforma_invoice';
+
+  // --- Renderizado del Formulario ---
   return (
     <div className="w-full flex flex-col gap-4">
-      {/* Selector Template */}
+      {/* Selector Tipo Factura */}
       <CustomSelectSimple
-        label="Template"
-        options={[{ value: "standard_invoice", label: "Standard Invoice" }]}
+        label="Invoice Type"
+        options={templateOptions} // Usa prop (con fallback local)
         value={selectedTemplate}
         onChange={handleTemplateChange}
-        error={errors.template} // Mantiene validación visual para el template
+        error={errors.template}
         id="invoiceTemplate"
       />
 
-      {selectedTemplate === "standard_invoice" && (
+
+      {/* Renderizado Condicional del Formulario */}
+      {(selectedTemplate === "standard_invoice" || isProforma) && (
         <>
-          {/* --- Secciones del Acordeón --- */}
+          {/* --- Secciones Acordeón usando el componente MODIFICADO --- */}
           <AccordionSection
             title="Invoice Information"
+            subtitle={isProforma ? "Includes 'Valid Until'" : null}
             isOpen={openAccordions.invoiceInfo}
-            onToggle={() => toggleAccordion("invoiceInfo")} // <--- Conectado
+            onToggle={() => toggleAccordion("invoiceInfo")}
           >
              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* Campos ReadOnly y sin validación visual */}
-                <CustomInputSimple label="Invoice Number" value={formData.invoiceNumber} readOnly id="invoiceNumber" />
-                <CustomDatePickerSimple label="Invoice Date" value={formData.invoiceDate} readOnly id="invoiceDate" dateFormat="MM/dd/yyyy"/>
-                 {/* Campo Editable con validación visual */}
-                <CustomDatePickerSimple label="Due Date" value={formData.dueDate} onChange={(d) => handleInputChange("dueDate", d)} error={errors.dueDate} id="dueDate"/>
+                 <CustomInputSimple label={isProforma ? "Proforma Invoice Number" : "Invoice Number"} value={formData.invoiceNumber} readOnly id="invoiceNumber" />
+                 <CustomDatePickerSimple label="Issue Date" value={formData.invoiceDate} readOnly id="invoiceDate" dateFormat="MM/dd/yyyy"/>
+                {!isProforma && (
+                    <CustomDatePickerSimple label="Due Date" value={formData.dueDate} onChange={(d) => handleInputChange("dueDate", d)} error={errors.dueDate} id="dueDate"/>
+                )}
+                 {isProforma && (
+                    <CustomDatePickerSimple label="Valid Until" value={formData.validUntil} onChange={(d) => handleInputChange("validUntil", d)} error={errors.validUntil} id="validUntil"/>
+                 )}
              </div>
           </AccordionSection>
 
@@ -213,9 +236,7 @@ const CreateInvoiceForm = ({
                                 <td className="px-4 py-3 text-sm"><CustomInputSimple type="number" value={item.quantity} onChange={(v) => handleItemChange(index, "quantity", v)} error={errors[`items[${index}].quantity`]} placeholder="0" id={`item-${index}-quantity`}/></td>
                                 <td className="px-4 py-3 text-sm"><CustomInputSimple type="number" inputMode="decimal" step="0.01" value={item.unitPrice} onChange={(v) => handleItemChange(index, "unitPrice", v)} error={errors[`items[${index}].unitPrice`]} placeholder="0.00" id={`item-${index}-unitPrice`}/></td>
                                 <td className="px-4 py-3 text-sm"><CustomInputSimple value={formatCurrency(item.total)} readOnly className="w-full bg-gray-100"/></td>
-                                <td className="px-4 py-3 text-sm">
-                                    {formData.items.length > 1 && ( <button onClick={() => handleRemoveItem(index)} aria-label={`Remove item ${index + 1}`} className="p-1 bg-white hover:bg-gray-200 rounded-md flex items-center justify-center border border-gray-300"><TrashIcon className="h-5 w-5 text-red-500" /></button> )}
-                                </td>
+                                <td className="px-4 py-3 text-sm">{formData.items.length > 1 && ( <button onClick={() => handleRemoveItem(index)} aria-label={`Remove item ${index + 1}`} className="p-1 bg-white hover:bg-gray-200 rounded-md flex items-center justify-center border border-gray-300"><TrashIcon className="h-5 w-5 text-red-500" /></button> )}</td>
                               </tr>
                             ))}
                            </tbody>
@@ -225,7 +246,7 @@ const CreateInvoiceForm = ({
                         <PlusIcon className="h-5 w-5" /> Add Item
                     </button>
                     <div className="mt-6 space-y-2">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                            <CustomInputSimple label="Tax Rate (%)" type="text" inputMode="decimal" value={formData.tax} onChange={(v) => handleInputChange("tax", v)} error={errors.tax} id="taxRate"/>
                            <CustomInputSimple label="Shipping" type="number" inputMode="decimal" step="0.01" value={formData.shipping} onChange={(v) => handleInputChange("shipping", v)} error={errors.shipping} id="shippingCost"/>
                            <CustomInputSimple label="Discount" type="number" inputMode="decimal" step="0.01" value={formData.discount} onChange={(v) => handleInputChange("discount", v)} error={errors.discount} id="discountAmount"/>
@@ -241,24 +262,56 @@ const CreateInvoiceForm = ({
                     </div>
                 </div>
            </AccordionSection>
-           {/* --------------------------------- */}
+           {/* ------------------------------------------- */}
+
+
+           {/* Sección Shipping Info (SOLO para Proforma) */}
+           {isProforma && (
+                <AccordionSection
+                  title="Shipping Information"
+                  subtitle="Proforma Specific"
+                  isOpen={openAccordions.shippingInfo}
+                  onToggle={() => toggleAccordion("shippingInfo")}
+                >
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <CustomDatePickerSimple label="Estimated Delivery Date" value={formData.estimatedDeliveryDate} onChange={(d) => handleInputChange("estimatedDeliveryDate", d)} error={errors.estimatedDeliveryDate} id="estimatedDeliveryDate"/>
+                        <CustomInputSimple label="Shipping Method" value={formData.shippingMethod} onChange={(v) => handleInputChange("shippingMethod", v)} error={errors.shippingMethod} id="shippingMethod" placeholder="e.g., Express Courier"/>
+                    </div>
+                </AccordionSection>
+           )}
 
            {/* --- SECCIÓN PAYMENT (Contenido Restaurado) --- */}
            <AccordionSection title="Payment Terms & Methods" isOpen={openAccordions.paymentTerms} onToggle={() => toggleAccordion("paymentTerms")}>
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                 <CustomInputSimple label="Payment Terms" value={formData.paymentTerms} onChange={(v) => handleInputChange("paymentTerms", v)} placeholder="E.g., Net 30, Due on Receipt" error={errors.paymentTerms} id="paymentTerms" />
+                 <CustomInputSimple label="Payment Terms" value={formData.paymentTerms} onChange={(v) => handleInputChange("paymentTerms", v)} placeholder={isProforma ? 'e.g., 50% upfront' : 'e.g., Net 30'} error={errors.paymentTerms} id="paymentTerms" />
                  <CustomSelectSimple label="Payment Methods" options={paymentMethodOptions} value={formData.paymentMethods} onChange={(value) => handleInputChange("paymentMethods", value)} error={errors.paymentMethods} id="paymentMethods"/>
              </div>
            </AccordionSection>
-           {/* --------------------------------- */}
+           {/* -------------------------------------------- */}
 
            <AccordionSection title="Please make payments to" isOpen={openAccordions.bankInfo} onToggle={() => toggleAccordion("bankInfo")}>
               <BankInfoFields data={formData.bankInfo} parentKey="bankInfo" onChange={handleNestedInputChange} errors={errors}/>
            </AccordionSection>
 
-           <AccordionSection title="Notes" isOpen={openAccordions.notes} onToggle={() => toggleAccordion("notes")}>
-              <CustomInputSimple label="Additional Information or Thank You Message" value={formData.notes} onChange={(v) => handleInputChange("notes", v)} id="notes"/>
+           {/* --- SECCIÓN NOTES/TERMS (Contenido Restaurado) --- */}
+           <AccordionSection title={isProforma ? "Terms & Conditions" : "Notes"} isOpen={openAccordions.notes} onToggle={() => toggleAccordion("notes")}>
+              {isProforma && (
+                  <div className="p-3 mb-3 text-sm text-blue-700 bg-blue-100 border border-blue-200 rounded-md flex items-center gap-2">
+                      <InformationCircleIcon className="h-5 w-5 flex-shrink-0"/>
+                      <span>Remember to include proforma-specific terms (non-binding, price validity, etc.).</span>
+                  </div>
+              )}
+              <CustomInputSimple
+                 label={isProforma ? "Proforma Terms & Conditions" : "Additional Information or Thank You Message"}
+                 placeholder={isProforma ? "- This is a proforma invoice...\n- Prices subject to change..." : "Thank you for your business!"}
+                 value={formData.notes}
+                 onChange={(v) => handleInputChange("notes", v)}
+                 id="notes"
+                 as="textarea" // <-- Soporte para Textarea
+                 rows={isProforma ? 5 : 3} // <-- Diferente altura
+              />
            </AccordionSection>
+           {/* ------------------------------------------------- */}
         </>
       )}
     </div>

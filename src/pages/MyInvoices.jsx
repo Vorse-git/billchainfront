@@ -75,7 +75,7 @@ const MyInvoices = () => {
 
         <div className="px-6 py-1 pb-6 flex justify-between items-center">
           <div>
-            <h1 className="text-5xl font-bold text-[#1b1b1b]">My Invoices</h1>
+            <h1 className="text-4xl font-bold text-[#1b1b1b]">My Invoices</h1>
             <p className="text-gray-500 py-2 text-lg">
               View and manage your invoices easily.
             </p>
