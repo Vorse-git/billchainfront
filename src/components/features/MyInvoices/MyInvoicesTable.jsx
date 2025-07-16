@@ -2,23 +2,19 @@ import { useState, useMemo } from "react";
 import { Checkbox, Button, IconButton } from "@material-tailwind/react";
 import { ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { EyeIcon, PencilIcon, ArrowDownTrayIcon, TrashIcon } from "@heroicons/react/24/outline";
-
-// Este es un componente de "Presentación" o "Dumb".
-// Su única responsabilidad es MOSTRAR los datos que recibe a través de la prop `data`.
-// No debe tener lógica de negocio como filtrar o buscar.
+/**
+ * This is a presentational (dumb) component.
+ * Its sole responsibility is to DISPLAY the invoices data received via props.
+ * It should not contain any business logic like filtering or searching.
+ */
 const MyInvoicesTable = ({ data =[],filters}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [allChecked, setAllChecked] = useState(false);
   const [checkedRows, setCheckedRows] = useState({});
   const itemsPerPage = 5;
-
-  // ===================================================================================
-  // CAMBIO 2: Se ELIMINA la importación y la lógica de filtrado.
-  // La línea `const invoices = dataMyInvoices;` se ha eliminado.
-  // La constante `filteredData` también se ha eliminado.
-  // Ahora, la prop `data` ya contiene los datos filtrados que necesitamos.
-  // ===================================================================================
-
+  /**
+   * Returns the appropriate badge style based on invoice status.
+   */
   const getStatusBadge = (status) => {
     const statusConfig = {
       Pending: "bg-[#FEFAED] border-[#F5CE4E] text-[#272727]",
@@ -42,19 +38,24 @@ const MyInvoicesTable = ({ data =[],filters}) => {
     );
   };
   const totalPages = Math.ceil(data.length / itemsPerPage);
+  /**
+   * Memoized slice of data for current page.
+   */
   const paginatedData = useMemo(() => {
     return data.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
   }, [data, currentPage]);
-
-
-
+  /**
+   * Handle changing the current page.
+   */
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
-
+  /**
+   * Handle selecting/deselecting all rows in the current page.
+   */
   const handleAllChecked = () => {
     const newAllChecked = !allChecked;
     setAllChecked(newAllChecked);
@@ -65,14 +66,19 @@ const MyInvoicesTable = ({ data =[],filters}) => {
     });
     setCheckedRows(newCheckedRows);
   };
-
+  /**
+   * Handle selecting/deselecting a single row.
+   */
   const handleRowChecked = (id) => {
     setCheckedRows((prev) => ({
       ...prev,
       [id]: !prev[id],
     }));
   };
-
+  /**
+   * Basic pagination component.
+   * Shows a range of pages and handles navigation.
+   */
   const DefaultPagination = () => {
     const getItemProps = (index) => ({
       variant: currentPage === index ? "filled" : "text",
@@ -90,7 +96,7 @@ const MyInvoicesTable = ({ data =[],filters}) => {
       setCurrentPage(currentPage - 1);
     };
 
-    // Calcular el rango de páginas a mostrar
+    // Calculate the range of pages to display
     const startPage = Math.max(1, currentPage - 2);
     const endPage = Math.min(totalPages, currentPage + 2);
 
@@ -105,9 +111,9 @@ const MyInvoicesTable = ({ data =[],filters}) => {
           <ArrowLeftIcon strokeWidth={2} className="h-4 w-4" /> PREVIOUS
         </Button>
         <div className="flex items-center gap-2">
-          {/* Mostrar botones de páginas */}
+          {/* Show page buttons */}
           {Array.from({ length: totalPages }, (_, i) => i + 1)
-            .slice(startPage - 1, endPage) // Mostrar solo un rango de páginas
+            .slice(startPage - 1, endPage) // Show only a range of pages
             .map((page) => (
               <IconButton
                 key={page}
@@ -123,9 +129,9 @@ const MyInvoicesTable = ({ data =[],filters}) => {
             ))}
         </div>
         <div className="flex items-center gap-2">
-          {/* Mostrar botones de páginas */}
+          {/* Show page buttons */}
           {Array.from({ length: totalPages }, (_, i) => i + 2)
-            .slice(startPage - 1, endPage) // Mostrar solo un rango de páginas
+            .slice(startPage - 1, endPage) // Show only a range of pages
             .map((page) => (
               <IconButton
                 key={page}
@@ -141,9 +147,9 @@ const MyInvoicesTable = ({ data =[],filters}) => {
             ))}
         </div>
         <div className="flex items-center gap-2">
-          {/* Mostrar botones de páginas */}
+          {/* Show page buttons */}
           {Array.from({ length: totalPages }, (_, i) => i + 3)
-            .slice(startPage - 1, endPage) // Mostrar solo un rango de páginas
+            .slice(startPage - 1, endPage)
             .map((page) => (
               <IconButton
                 key={page}
@@ -159,9 +165,9 @@ const MyInvoicesTable = ({ data =[],filters}) => {
             ))}
         </div>
         <div className="flex items-center gap-2">
-          {/* Mostrar botones de páginas */}
+          {/* Show page buttons */}
           {Array.from({ length: totalPages }, (_, i) => i + 4)
-            .slice(startPage - 1, endPage) // Mostrar solo un rango de páginas
+            .slice(startPage - 1, endPage)
             .map((page) => (
               <IconButton
                 key={page}
@@ -177,9 +183,9 @@ const MyInvoicesTable = ({ data =[],filters}) => {
             ))}
         </div>
         <div className="flex items-center gap-2">
-          {/* Mostrar botones de páginas */}
+          {/* Show page buttons */}
           {Array.from({ length: totalPages }, (_, i) => i + 5)
-            .slice(startPage - 1, endPage) // Mostrar solo un rango de páginas
+            .slice(startPage - 1, endPage)
             .map((page) => (
               <IconButton
                 key={page}
