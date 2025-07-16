@@ -1,20 +1,23 @@
-import { useState } from "react";
-import dataMyInvoices from "../../data/dataMyInvoices.js";
+import { useState, useMemo } from "react";
 import { Checkbox, Button, IconButton } from "@material-tailwind/react";
 import { ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { EyeIcon, PencilIcon, ArrowDownTrayIcon, TrashIcon } from "@heroicons/react/24/outline";
 
-const MyInvoicesTable = () => {
-  const [search, setSearch] = useState("");
-  const [date, setDate] = useState("");
-  const [status, setStatus] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("");
+// Este es un componente de "Presentación" o "Dumb".
+// Su única responsabilidad es MOSTRAR los datos que recibe a través de la prop `data`.
+// No debe tener lógica de negocio como filtrar o buscar.
+const MyInvoicesTable = ({ data =[],filters}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [allChecked, setAllChecked] = useState(false);
   const [checkedRows, setCheckedRows] = useState({});
   const itemsPerPage = 5;
 
-  const invoices = dataMyInvoices;
+  // ===================================================================================
+  // CAMBIO 2: Se ELIMINA la importación y la lógica de filtrado.
+  // La línea `const invoices = dataMyInvoices;` se ha eliminado.
+  // La constante `filteredData` también se ha eliminado.
+  // Ahora, la prop `data` ya contiene los datos filtrados que necesitamos.
+  // ===================================================================================
 
   const getStatusBadge = (status) => {
     const statusConfig = {
@@ -22,13 +25,13 @@ const MyInvoicesTable = () => {
       Paid: "bg-[#F0F9E6] border-[#6AC100] text-[#272727]",
       Overdue: "bg-[#FCEDF0] border-[#DF4765] text-[#272727]",
     };
-  
+
     const circleColor = {
       Pending: "bg-[#F5CE4E]",
       Paid: "bg-[#6AC100]",
       Overdue: "bg-[#DF4765]",
     };
-  
+
     return (
       <span
         className={`inline-flex items-center space-x-2 rounded-full border px-3 py-1 ${statusConfig[status]}`}
@@ -38,27 +41,15 @@ const MyInvoicesTable = () => {
       </span>
     );
   };
-  
-  const filteredData = invoices.filter((invoice) => {
-    const companyName = invoice.companyName?.toLowerCase() || "";
-    const invoiceStatus = invoice.status || "";
-    const invoicePaymentMethod = invoice.paymentMethod || "";
-    const invoiceDate = invoice.dateCreated || "";
-
-    return (
-      companyName.includes(search.toLowerCase()) &&
-      (status ? invoiceStatus === status : true) &&
-      (paymentMethod ? invoicePaymentMethod === paymentMethod : true) &&
-      (date ? invoiceDate === date : true)
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const paginatedData = useMemo(() => {
+    return data.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
     );
-  });
+  }, [data, currentPage]);
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -220,42 +211,8 @@ const MyInvoicesTable = () => {
     <div className="border rounded-2xl overflow-hidden bg-white p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold text-gray-700">Invoices list</h2>
-        <div className="flex gap-4">
-          <input
-            type="text"
-            placeholder="Search company"
-            className="border p-2 rounded-lg w-[200px] h-[40px] text-gray-400 hover:border-gray-600 hover:text-gray-600 transition-colors duration-200"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <input
-            type="date"
-            className="border p-2 rounded-lg w-[200px] h-[40px] text-gray-400 hover:border-gray-600 hover:text-gray-600 transition-colors duration-200"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-          <select
-            className="border p-2 rounded-lg w-[200px] h-[40px] text-gray-400 hover:border-gray-600 hover:text-gray-600 transition-colors duration-200"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
-            <option value="">All Status</option>
-            <option value="Pending">Pending</option>
-            <option value="Paid">Paid</option>
-            <option value="Overdue">Overdue</option>
-          </select>
-          <select
-            className="border p-2 rounded-lg w-[200px] h-[40px] text-gray-400 hover:border-gray-600 hover:text-gray-600 transition-colors duration-200"
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-          >
-            <option value="">All Methods</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-            <option value="Credit Card">Credit Card</option>
-            <option value="PayPal">PayPal</option>
-            <option value="Wire Transfer">Wire Transfer</option>
-          </select>
-        </div>
+        {filters}
+
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">

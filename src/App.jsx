@@ -1,5 +1,8 @@
-// ✅ App.jsx (CORREGIDO - SIN Router duplicado)
-import { Routes, Route } from "react-router-dom"; // <--- SOLO Routes y Route
+// src/App.jsx
+import { Routes, Route } from "react-router-dom";
+import { AuthProvider } from './context/AuthContext'; // Provides global authentication state.
+
+// Route components
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import MyInvoices from "./pages/MyInvoices";
@@ -7,44 +10,45 @@ import CreateInvoice from "./pages/CreateInvoice";
 import PrivateRoute from "./routes/PrivateRoute";
 
 function App() {
-  return (
-    // --- SIN <Router> aquí ---
-    <Routes>
-      {/* Ruta pública para Login */}
-      <Route path="/" element={<Login />} />
-      <Route path="/login" element={<Login />} /> {/* Ruta explícita */}
+    return (
+        // Wrap the entire routing system with AuthProvider to share auth state.
+        <AuthProvider>
+            <Routes>
+                {/* Public routes (accessible without authentication) */}
+                <Route path="/" element={<Login />} />
+                <Route path="/login" element={<Login />} />
 
-      {/* Rutas protegidas */}
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/myinvoices"
-        element={
-          <PrivateRoute>
-            <MyInvoices />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        // Mantén esta ruta como la tengas en tus Links/navigate (ej. /create-invoice)
-        path="/createinvoice"
-        element={
-          <PrivateRoute>
-            <CreateInvoice />
-          </PrivateRoute>
-        }
-      />
-      {/* Ruta catch-all */}
-      <Route path="*" element={<h1 className="text-center text-red-500 mt-10 text-xl">❌ Page Not Found</h1>} />
-    </Routes>
-    // --- FIN ---
-  );
+                {/* Protected routes (require authentication) */}
+                <Route
+                    path="/dashboard"
+                    element={
+                        <PrivateRoute>
+                            <Dashboard />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/myinvoices"
+                    element={
+                        <PrivateRoute>
+                            <MyInvoices />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/createinvoice"
+                    element={
+                        <PrivateRoute>
+                            <CreateInvoice />
+                        </PrivateRoute>
+                    }
+                />
+
+                {/* Fallback route for unmatched URLs */}
+                <Route path="*" element={<h1 className="text-center text-red-500 mt-10 text-xl">❌ Page Not Found</h1>} />
+            </Routes>
+        </AuthProvider>
+    );
 }
 
 export default App;
